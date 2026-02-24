@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Una carta para ti</title>
+    <meta name="description" content="Una experiencia única escrita desde el corazón.">
+
+    <!-- Preconnect para velocidad -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Great+Vibes&family=Outfit:wght@200;300;400&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --void: #08080f;
+            --void-mid: #0f0f1a;
+            --parchment: #f4ebd8;
+            --parchment-dark: #e3d5b8;
+            --gold: #d4af37;
+            --gold-light: #fde047;
+            --gold-dark: #997a00;
+            --ink: #2c251e;
+            --purple-deep: #1a0a2e;
+            --rose: #b76e79;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--void);
+            color: var(--parchment);
+            font-family: 'Cormorant Garamond', serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ===== VIÑETA CINEMATOGRÁFICA ===== */
+        .cinematic-vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+        }
+
+        /* ===== CANVAS INTERACTIVO ===== */
+        #interactive-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* ===== GRADIENTE ANIMADO DE FONDO ===== */
+        .ambient-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(26, 10, 46, 0.6) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+            animation: ambientShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes ambientShift {
+            0% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.8;
+            }
+        }
+
+        /* ===== BARRA DE PROGRESO ===== */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+            z-index: 100;
+            width: 0%;
+            transition: width 0.5s ease-out;
+            box-shadow: 0 0 10px var(--gold), 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        /* ===== BOTÓN DE SONIDO ===== */
+        #sound-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 99;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(15, 15, 26, 0.7);
+            backdrop-filter: blur(10px);
+            color: var(--gold);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sound-toggle:hover {
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* ===== PANTALLA APERTURA ===== */
+        .screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            padding: 24px;
+        }
+
+        .screen.is-hidden {
+            display: none;
+        }
+
+        .opening-quote {
+            font-size: clamp(1.5rem, 4vw, 3.2rem);
+            font-weight: 300;
+            line-height: 1.6;
+            letter-spacing: 0.02em;
+            text-align: center;
+            max-width: 750px;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: riseIn 2.5s ease-out 0.5s forwards;
+        }
+
+        .opening-quote .accent {
+            color: var(--gold);
+            font-style: italic;
+            display: block;
+            margin-top: 12px;
+        }
+
+        @keyframes riseIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== SOBRE ANIMADO ===== */
+        .envelope-btn {
+            margin-top: 60px;
+            position: relative;
+            cursor: pointer;
+            background: none;
+            border: none;
+            opacity: 0;
+            animation: riseIn 2s ease-out 2s forwards;
+        }
+
+        .envelope-body {
+            width: 140px;
+            height: 90px;
+            background: linear-gradient(145deg, var(--parchment), var(--parchment-dark));
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.3);
+            transition: all 0.6s ease;
+            overflow: hidden;
+        }
+
+        .envelope-btn:hover .envelope-body {
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3), 0 0 0 1px var(--gold);
+            transform: translateY(-4px);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 70px solid transparent;
+            border-right: 70px solid transparent;
+            border-top: 55px solid var(--parchment-dark);
+            transition: transform 0.6s ease;
+            transform-origin: top center;
+            filter: brightness(0.92);
+        }
+
+        .envelope-btn:hover .envelope-flap {
+            transform: rotateX(160deg);
+        }
+
+        .envelope-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #c0392b, #8b1a1a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .envelope-seal i {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        .envelope-label {
+            display: block;
+            margin-top: 20px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--gold);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            transition: opacity 0.4s;
+        }
+
+        .envelope-btn:hover .envelope-label {
+            opacity: 1;
+        }
+
+        /* ===== TRANSICIONES ===== */
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 2s ease-out, transform 2s ease-out;
+        }
+
+        .fade-enter.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+            transition: opacity 1.5s ease-in !important;
+            pointer-events: none !important;
+        }
+
+        /* ===== CARTA (PAPIRO VIEJO CON BORDES QUEMADOS) ===== */
+        .old-paper {
+            background-color: #e8d5b0;
+            background-image:
+                /* Textura de ruido grueso (fibras del papiro) */
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='6' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.18'/%3E%3C/svg%3E"),
+                /* Manchas de humedad */
+                radial-gradient(ellipse at 15% 20%, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 75%, rgba(120, 80, 30, 0.12) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 90%, rgba(101, 67, 33, 0.1) 0%, transparent 40%),
+                /* Variación tonal del papiro */
+                linear-gradient(180deg, #eedcb8 0%, #e2ceaa 30%, #dbc49e 60%, #d5bb94 100%);
+            color: var(--ink);
+            box-shadow:
+                /* Sombra interior quemada en bordes */
+                inset 0 0 100px rgba(80, 40, 0, 0.35),
+                inset 0 0 40px rgba(60, 25, 0, 0.25),
+                inset 5px 5px 20px rgba(139, 69, 19, 0.15),
+                inset -5px -5px 20px rgba(139, 69, 19, 0.15),
+                /* Sombra exterior */
+                0 25px 60px rgba(0, 0, 0, 0.6),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            /* Bordes irregulares con clip-path */
+            clip-path: polygon(2% 0%, 5% 1%, 8% 0%, 12% 0.5%, 18% 0%, 22% 1%, 28% 0%, 35% 0.5%,
+                    40% 0%, 48% 1%, 55% 0%, 60% 0.5%, 68% 0%, 75% 1%, 82% 0%, 88% 0.5%,
+                    92% 0%, 95% 0.5%, 98% 0%, 100% 2%,
+                    100% 5%, 99% 10%, 100% 15%, 99.5% 22%, 100% 30%, 99% 38%,
+                    100% 45%, 99.5% 55%, 100% 62%, 99% 70%, 100% 78%, 99.5% 85%,
+                    100% 92%, 99% 96%, 100% 98%,
+                    98% 100%, 95% 99%, 90% 100%, 85% 99.5%, 78% 100%, 72% 99%,
+                    65% 100%, 58% 99.5%, 50% 100%, 42% 99%, 35% 100%, 28% 99.5%,
+                    20% 100%, 15% 99%, 10% 100%, 5% 99.5%, 2% 100%, 0% 98%,
+                    0.5% 92%, 0% 85%, 1% 78%, 0% 70%, 0.5% 62%, 0% 55%,
+                    1% 48%, 0% 40%, 0.5% 32%, 0% 25%, 1% 18%, 0% 10%, 0.5% 5%);
+        }
+
+        /* Mancha de café decorativa */
+        .old-paper::before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            top: -20px;
+            right: 30px;
+            background: radial-gradient(ellipse, rgba(139, 90, 43, 0.08) 20%, rgba(139, 90, 43, 0.04) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: rotate(15deg);
+        }
+
+        /* Efecto de quemadura en esquinas */
+        .old-paper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                /* Esquinas quemadas */
+                radial-gradient(ellipse at 0% 0%, rgba(40, 20, 0, 0.4) 0%, transparent 15%),
+                radial-gradient(ellipse at 100% 0%, rgba(50, 25, 0, 0.3) 0%, transparent 12%),
+                radial-gradient(ellipse at 0% 100%, rgba(45, 20, 0, 0.35) 0%, transparent 14%),
+                radial-gradient(ellipse at 100% 100%, rgba(55, 25, 0, 0.3) 0%, transparent 18%),
+                /* Bordes oscurecidos */
+                linear-gradient(to right, rgba(80, 40, 0, 0.15) 0%, transparent 5%, transparent 95%, rgba(80, 40, 0, 0.15) 100%),
+                linear-gradient(to bottom, rgba(80, 40, 0, 0.12) 0%, transparent 4%, transparent 96%, rgba(80, 40, 0, 0.12) 100%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        /* Sombra extra detrás del papel para efecto "flotante" */
+        .paper-shadow-wrapper {
+            position: relative;
+            filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.5)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* ===== MÁQUINA DE ESCRIBIR ===== */
+        #typewriter-content {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            line-height: 1.9;
+            text-align: justify;
+        }
+
+        #typewriter-content p {
+            margin-bottom: 1.8em;
+        }
+
+        .typing-cursor::after {
+            content: '▎';
+            animation: blink 1s step-end infinite;
+            color: var(--gold-dark);
+            font-weight: 300;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* ===== BOTÓN DE DECISIÓN ===== */
+        .decision-btn {
+            padding: 16px 48px;
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.05em;
+        }
+
+        .decision-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: -1;
+            border-radius: 50px;
+        }
+
+        .decision-btn:hover {
+            color: var(--void);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
+            transform: scale(1.05);
+        }
+
+        .decision-btn:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* ===== CARRUSEL 3D ACORDEÓN ===== */
+        .accordion-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .accordion-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 12px;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1.5s ease-out;
+        }
+
+        .accordion-title.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .accordion-subtitle {
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: rgba(244, 235, 216, 0.5);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+            opacity: 0;
+            transition: opacity 1.5s ease-out 0.5s;
+        }
+
+        .accordion-subtitle.is-visible {
+            opacity: 1;
+        }
+
+        /* Escenario 3D */
+        .accordion-scene {
+            perspective: 1200px;
+            width: 100%;
+            height: clamp(360px, 55vw, 520px);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cada tarjeta 3D */
+        .accordion-card {
+            position: absolute;
+            width: clamp(260px, 38vw, 380px);
+            height: clamp(340px, 50vw, 480px);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            box-shadow:
+                0 0 0 1px rgba(212, 175, 55, 0.25),
+                0 20px 50px rgba(0, 0, 0, 0.4);
+            will-change: transform, opacity;
+        }
+
+        .accordion-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: saturate(1.1) contrast(1.05);
+            transition: transform 6s ease-out;
+        }
+
+        .accordion-card.active img {
+            transform: scale(1.05);
+        }
+
+        /* Marco dorado interior */
+        .accordion-card::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            z-index: 3;
+            pointer-events: none;
+            transition: border-color 0.6s ease;
+        }
+
+        .accordion-card.active::before {
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+
+        /* Overlay con texto */
+        .accordion-card .card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.15) 45%, transparent 65%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: clamp(16px, 3vw, 28px);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .accordion-card.active .card-overlay {
+            opacity: 1;
+        }
+
+        .card-caption {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(1.3rem, 2.5vw, 2rem);
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+            margin-bottom: 6px;
+        }
+
+        .card-quote {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.5;
+        }
+
+        /* Número de tarjeta */
+        .card-number {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.15em;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .accordion-card.active .card-number {
+            opacity: 1;
+        }
+
+        /* Efecto brillo dorado en borde activo */
+        .accordion-card.active {
+            box-shadow:
+                0 0 0 2px rgba(212, 175, 55, 0.5),
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(212, 175, 55, 0.12);
+        }
+
+        /* Efecto de reflejo en tarjetas inactivas */
+        .accordion-card:not(.active)::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 15, 26, 0.4);
+            z-index: 2;
+            pointer-events: none;
+            transition: background 0.6s ease;
+        }
+
+        .accordion-card:not(.active):hover::after {
+            background: rgba(15, 15, 26, 0.2);
+        }
+
+        /* Controles */
+        .accordion-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .accordion-arrow {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(15, 15, 26, 0.5);
+            backdrop-filter: blur(8px);
+            color: var(--gold);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .accordion-arrow:hover {
+            background: var(--gold);
+            color: var(--void);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Indicadores de posición */
+        .accordion-dots {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .accordion-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .accordion-dot.active {
+            background: var(--gold);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+            transform: scale(1.3);
+            width: 24px;
+            border-radius: 10px;
+        }
+
+        .accordion-continue-btn {
+            margin-top: 48px;
+            padding: 14px 40px;
+            background: transparent;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: var(--gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: riseIn 1.5s ease-out 1s forwards;
+        }
+
+        .accordion-continue-btn:hover {
+            background: var(--gold);
+            color: var(--void);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .accordion-scene {
+                height: clamp(320px, 70vw, 450px);
+            }
+
+            .accordion-card {
+                width: clamp(200px, 55vw, 280px);
+                height: clamp(280px, 70vw, 380px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .accordion-scene {
+                height: 400px;
+            }
+
+            .accordion-card {
+                width: 220px;
+                height: 300px;
+            }
+        }
+
+        /* ===== BOLETO ===== */
+        .boarding-pass {
+            background: var(--parchment);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+            color: var(--ink);
+            border: 1px solid var(--gold);
+            box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15), 0 0 0 1px rgba(212, 175, 55, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .boarding-pass::before,
+        .boarding-pass::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 30px;
+            background-color: var(--void);
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        .boarding-pass::before {
+            left: -15px;
+            border-right: 1px solid var(--gold);
+        }
+
+        .boarding-pass::after {
+            right: -15px;
+            border-left: 1px solid var(--gold);
+        }
+
+        .dashed-line {
+            border-left: 2px dashed rgba(139, 69, 19, 0.2);
+        }
+
+        .golden-glow {
+            animation: glowPulse 3s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            from {
+                text-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+            }
+
+            to {
+                text-shadow: 0 0 25px rgba(212, 175, 55, 0.5), 0 0 50px rgba(212, 175, 55, 0.2);
+            }
+        }
+
+        /* ===== CONFETTI CANVAS ===== */
+        #confetti-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .boarding-pass {
+                flex-direction: column !important;
+            }
+
+            .dashed-line {
+                border-left: none;
+                border-top: 2px dashed rgba(139, 69, 19, 0.2);
+            }
+
+            .boarding-pass::before,
+            .boarding-pass::after {
+                display: none;
+            }
+        }
+
+        /* ===== UTILIDADES ===== */
+        .font-script {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        .text-gold {
+            color: var(--gold);
+        }
+
+        .text-gold-dark {
+            color: var(--gold-dark);
+        }
+
+        .text-parchment {
+            color: var(--parchment);
+        }
+
+        .text-ink {
+            color: var(--ink);
+        }
+
+        .text-muted {
+            color: #8a8070;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Gradiente ambiental animado -->
+    <div class="ambient-gradient"></div>
+
+    <!-- Canvas interactivo (partículas + mouse) -->
+    <canvas id="interactive-bg"></canvas>
+
+    <!-- Viñeta cinematográfica -->
+    <div class="cinematic-vignette"></div>
+
+    <!-- Barra de progreso -->
+    <div id="progress-bar"></div>
+
+    <!-- Botón de sonido -->
+    <button id="sound-toggle" onclick="toggleSound()" aria-label="Activar o desactivar sonido">
+        <i class="fa-solid fa-volume-xmark"></i>
+    </button>
+
+    <!-- Canvas para confetti -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ==========================================
+         PANTALLA 1: EL HALLAZGO
+         ========================================== -->
+    <section id="screen-opening" class="screen">
+        <div style="text-align:center; max-width: 750px;">
+            <h1 class="opening-quote">
+                <span>"Algunas cartas no se escriben…</span>
+                <span class="accent">se esperan toda una vida para ser encontradas."</span>
+            </h1>
+
+            <button class="envelope-btn" onclick="abrirCarta()" aria-label="Abrir la carta">
+                <div class="envelope-body">
+                    <div class="envelope-flap"></div>
+                    <div class="envelope-seal">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+                <span class="envelope-label">Abrir carta</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 2: LA CARTA
+         ========================================== -->
+    <section id="screen-letter" class="screen is-hidden" style="padding-top: 60px; padding-bottom: 60px;">
+        <div class="paper-shadow-wrapper">
+            <div class="old-paper fade-enter" id="letter-container"
+                style="max-width: 720px; width: 100%; padding: clamp(40px, 7vw, 80px);">
+                <div id="typewriter-content"></div>
+            </div>
+        </div>
+
+        <!-- Botón de decisión -->
+        <div id="decision-container" style="margin-top: 48px; opacity: 0; transition: opacity 1s; display: none;">
+            <button class="decision-btn" onclick="mostrarCarrusel()">
+                <i class="fa-solid fa-images" style="margin-right: 12px;"></i>Nuestros Recuerdos
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 3: CARRUSEL DE RECUERDOS
+         ========================================== -->
+    <section id="screen-carousel" class="screen is-hidden" style="padding-top: 40px; padding-bottom: 40px;">
+        <div class="accordion-wrapper fade-enter" id="carousel-content">
+            <h2 class="accordion-title" id="carousel-title">Nuestros Recuerdos</h2>
+            <p class="accordion-subtitle" id="carousel-subtitle">Los momentos que guardo en el corazón</p>
+
+            <div class="accordion-scene" id="accordion-scene">
+                <!-- Card 1 -->
+                <div class="accordion-card" data-index="0" onclick="goToSlide(0)">
+                    <img src="https://drive.google.com/uc?export=view&id=11HznxyKGTXU_c2o9EYyvgwxkWK8NG5xp"
+                        alt="Recuerdo 1">
+                    <div class="card-overlay">
+                        <div class="card-caption">Un atardecer juntos</div>
+                        <div class="card-quote">"Donde el sol se esconde, nuestro amor comienza a brillar."</div>
+                    </div>
+                    <div class="card-number">01 / 11</div>
+                </div>
+                <!-- Card 2 -->
+                <div class="accordion-card" data-index="1" onclick="goToSlide(1)">
+                    <img src="https://drive.google.com/uc?export=view&id=1Y_nojowWtTtypzq82lXNWGLJSArgRRgg"
+                        alt="Recuerdo 2">
+                    <div class="card-overlay">
+                        <div class="card-caption">El camino que recorrimos</div>
+                        <div class="card-quote">"No importa cuán largo sea el camino, contigo cada paso vale la pena."
+                        </div>
+                    </div>
+                    <div class="card-number">02 / 11</div>
+                </div>
+                <!-- Card 3 -->
+                <div class="accordion-card" data-index="2" onclick="goToSlide(2)">
+                    <img src="https://drive.google.com/uc?export=view&id=1Eu_uyJEruwdAxDewI50yj0aU49YxC8kT"
+                        alt="Recuerdo 3">
+                    <div class="card-overlay">
+                        <div class="card-caption">Cada amanecer contigo</div>
+                        <div class="card-quote">"Despertar sabiendo que existes es el mejor regalo que me da la vida."
+                        </div>
+                    </div>
+                    <div class="card-number">03 / 11</div>
+                </div>
+                <!-- Card 4 -->
+                <div class="accordion-card" data-index="3" onclick="goToSlide(3)">
+                    <img src="https://drive.google.com/uc?export=view&id=1hBnuQ5TGO5eF7IJ803zhT7hzy4Lez8S-"
+                        alt="Recuerdo 4">
+                    <div class="card-overlay">
+                        <div class="card-caption">Bajo las estrellas</div>
+                        <div class="card-quote">"El universo entero cabe en la forma en que me miras."</div>
+                    </div>
+                    <div class="card-number">04 / 11</div>
+                </div>
+                <!-- Card 5 -->
+                <div class="accordion-card" data-index="4" onclick="goToSlide(4)">
+                    <img src="https://drive.google.com/uc?export=view&id=1n4WUxnWpZUKgugPvXNjrSumiJolHx-9i"
+                        alt="Recuerdo 5">
+                    <div class="card-overlay">
+                        <div class="card-caption">La paz que me das</div>
+                        <div class="card-quote">"En un mundo ruidoso, tú eres mi silencio favorito."</div>
+                    </div>
+                    <div class="card-number">05 / 11</div>
+                </div>
+                <!-- Card 6 -->
+                <div class="accordion-card" data-index="5" onclick="goToSlide(5)">
+                    <img src="https://drive.google.com/uc?export=view&id=1_IOPhcrl24m6dppsETvi4tI-O-okIZgF"
+                        alt="Recuerdo 6">
+                    <div class="card-overlay">
+                        <div class="card-caption">Momentos inolvidables</div>
+                        <div class="card-quote">"Cada momento contigo se convierte en un tesoro eterno."</div>
+                    </div>
+                    <div class="card-number">06 / 11</div>
+                </div>
+                <!-- Card 7 -->
+                <div class="accordion-card" data-index="6" onclick="goToSlide(6)">
+                    <img src="https://drive.google.com/uc?export=view&id=1ht6U_j4tlfRhqYgmFcTV4qFYPfK4Z-2F"
+                        alt="Recuerdo 7">
+                    <div class="card-overlay">
+                        <div class="card-caption">Tu sonrisa</div>
+                        <div class="card-quote">"Tu sonrisa es la luz que ilumina mis días más oscuros."</div>
+                    </div>
+                    <div class="card-number">07 / 11</div>
+                </div>
+                <!-- Card 8 -->
+                <div class="accordion-card" data-index="7" onclick="goToSlide(7)">
+                    <img src="https://drive.google.com/uc?export=view&id=1MP9Sib6dicz00zLjES2PlvhmLSCKLo1c"
+                        alt="Recuerdo 8">
+                    <div class="card-overlay">
+                        <div class="card-caption">Juntos siempre</div>
+                        <div class="card-quote">"De todas las historias, la nuestra es mi favorita."</div>
+                    </div>
+                    <div class="card-number">08 / 11</div>
+                </div>
+                <!-- Card 9 -->
+                <div class="accordion-card" data-index="8" onclick="goToSlide(8)">
+                    <img src="https://drive.google.com/uc?export=view&id=1VRW5yW-xjBVI2xdoG29egIMqdhDbRDHs"
+                        alt="Recuerdo 9">
+                    <div class="card-overlay">
+                        <div class="card-caption">Nuestro refugio</div>
+                        <div class="card-quote">"En tus brazos encontré el lugar al que siempre quise pertenecer."</div>
+                    </div>
+                    <div class="card-number">09 / 11</div>
+                </div>
+                <!-- Card 10 -->
+                <div class="accordion-card" data-index="9" onclick="goToSlide(9)">
+                    <img src="https://drive.google.com/uc?export=view&id=1iEfIBjcWYQFNexyNUqEcc63xXMJH2PXb"
+                        alt="Recuerdo 10">
+                    <div class="card-overlay">
+                        <div class="card-caption">Promesas eternas</div>
+                        <div class="card-quote">"Te prometo cada mañana, cada tarde y cada noche por siempre."</div>
+                    </div>
+                    <div class="card-number">10 / 11</div>
+                </div>
+                <!-- Card 11 -->
+                <div class="accordion-card" data-index="10" onclick="goToSlide(10)">
+                    <img src="https://drive.google.com/uc?export=view&id=11HznxyKGTXU_c2o9EYyvgwxkWK8NG5xp"
+                        alt="Recuerdo 11">
+                    <div class="card-overlay">
+                        <div class="card-caption">Donde todo comenzó</div>
+                        <div class="card-quote">"Y si pudiera volver atrás, te elegiría de nuevo una y mil veces."</div>
+                    </div>
+                    <div class="card-number">11 / 11</div>
+                </div>
+            </div>
+
+            <!-- Controles -->
+            <div class="accordion-controls">
+                <button class="accordion-arrow" onclick="carouselPrev()" aria-label="Anterior">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="accordion-dots" id="accordion-dots"></div>
+                <button class="accordion-arrow" onclick="carouselNext()" aria-label="Siguiente">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Continuar al boleto -->
+            <div style="text-align: center;">
+                <button class="accordion-continue-btn" onclick="aceptarViaje()">
+                    <i class="fa-solid fa-plane-departure" style="margin-right: 10px;"></i>¿Aceptas viajar conmigo?
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 4: EL BOLETO
+         ========================================== -->
+    <section id="screen-ticket" class="screen is-hidden">
+        <div id="ticket-content" class="fade-enter"
+            style="text-align: center; max-width: 900px; margin: 0 auto; width: 100%;">
+
+            <!-- Mensaje romántico -->
+            <h2 style="font-size: clamp(1.3rem, 3.5vw, 2.2rem); line-height: 1.6; margin-bottom: 48px;"
+                class="text-parchment golden-glow">
+                "Gracias por elegir esta vida conmigo.<br>
+                <span class="font-script text-gold"
+                    style="font-size: clamp(2rem, 5vw, 3.5rem); display: block; margin-top: 16px;">
+                    Prometo hacer de cada día un recuerdo que merezca repetirse en todas las vidas."
+                </span>
+            </h2>
+
+            <!-- Boleto -->
+            <div class="boarding-pass"
+                style="display: flex; border-radius: 16px; max-width: 750px; margin: 0 auto; text-align: left; transition: transform 0.5s ease;">
+
+                <!-- Parte izquierda -->
+                <div style="padding: clamp(24px, 4vw, 40px); flex: 1; position: relative;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+                        <div>
+                            <p class="text-muted"
+                                style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 4px;">
+                                Clase</p>
+                            <p class="text-gold-dark" style="font-size: 1.2rem; font-weight: 700;">PRIMERA</p>
+                        </div>
+                        <i class="fa-solid fa-plane text-gold" style="font-size: 2rem; opacity: 0.4;"></i>
+                    </div>
+
+                    <div style="margin-bottom: 32px;">
+                        <p class="text-muted"
+                            style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 4px;">
+                            Pasajero</p>
+                        <p class="font-script" style="font-size: 2.2rem; color: var(--void);">El amor de mi vida</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p class="text-muted"
+                                style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 4px;">
+                                Origen</p>
+                            <p style="font-size: 1.4rem; font-weight: 700;">AQUÍ</p>
+                        </div>
+                        <div style="flex: 1; padding: 0 16px;">
+                            <div style="height: 1px; background: #ccc; position: relative;">
+                                <i class="fa-solid fa-plane text-gold"
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--parchment); padding: 0 8px;"></i>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <p class="text-muted"
+                                style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 4px;">
+                                Destino</p>
+                            <p class="text-gold-dark" style="font-size: 1.4rem; font-weight: 700;">NUESTRA FELICIDAD</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parte derecha -->
+                <div class="dashed-line"
+                    style="padding: clamp(24px, 4vw, 40px); width: 30%; min-width: 160px; background: #ebe0cb; display: flex; flex-direction: column; justify-content: space-between; border-radius: 0 16px 16px 0;">
+                    <div>
+                        <p class="text-muted"
+                            style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 4px;">
+                            Fecha</p>
+                        <p style="font-weight: 700; font-size: 1.1rem;">Toda la vida</p>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <p class="text-muted"
+                            style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 4px;">
+                            Asiento</p>
+                        <p class="text-gold-dark" style="font-weight: 700; font-size: 1.2rem;">A mi lado</p>
+                    </div>
+
+                    <!-- Código de barras estético -->
+                    <div style="margin-top: 24px; display: flex; height: 40px; gap: 2px; opacity: 0.5;">
+                        <div style="width:2px;height:100%;background:var(--void)"></div>
+                        <div style="width:4px;height:100%;background:var(--void)"></div>
+                        <div style="width:2px;height:100%;background:var(--void)"></div>
+                        <div style="width:6px;height:100%;background:var(--void)"></div>
+                        <div style="width:2px;height:100%;background:var(--void)"></div>
+                        <div style="width:4px;height:100%;background:var(--void)"></div>
+                        <div style="width:2px;height:100%;background:var(--void)"></div>
+                        <div style="width:2px;height:100%;background:var(--void)"></div>
+                        <div style="width:6px;height:100%;background:var(--void)"></div>
+                        <div style="width:4px;height:100%;background:var(--void)"></div>
+                        <div style="width:2px;height:100%;background:var(--void)"></div>
+                        <div style="width:4px;height:100%;background:var(--void)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         JAVASCRIPT
+         ========================================== -->
+    <script>
+        // ===================================================
+        // 1) FONDO INTERACTIVO CON CANVAS
+        // ===================================================
+        const canvas = document.getElementById('interactive-bg');
+        const ctx = canvas.getContext('2d');
+        let mouse = { x: -1000, y: -1000 };
+        let particles = [];
+        const PARTICLE_COUNT = 80;
+        const CONNECTION_DIST = 150;
+        const MOUSE_RADIUS = 200;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        document.addEventListener('mousemove', e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        document.addEventListener('touchmove', e => {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }, { passive: true });
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.baseSize = this.size;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.baseOpacity = this.opacity;
+                this.pulseSpeed = Math.random() * 0.02 + 0.005;
+                this.pulseOffset = Math.random() * Math.PI * 2;
+            }
+            update(time) {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Efecto de atracción suave hacia el mouse
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < MOUSE_RADIUS) {
+                    const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+                    this.vx += dx * force * 0.0003;
+                    this.vy += dy * force * 0.0003;
+                    this.opacity = this.baseOpacity + force * 0.5;
+                    this.size = this.baseSize + force * 2;
+                } else {
+                    this.opacity += (this.baseOpacity - this.opacity) * 0.02;
+                    this.size += (this.baseSize - this.size) * 0.02;
+                }
+
+                // Pulso orgánico
+                this.opacity += Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.05;
+
+                // Fricción
+                this.vx *= 0.999;
+                this.vy *= 0.999;
+
+                // Wrap
+                if (this.x < -10) this.x = canvas.width + 10;
+                if (this.x > canvas.width + 10) this.x = -10;
+                if (this.y < -10) this.y = canvas.height + 10;
+                if (this.y > canvas.height + 10) this.y = -10;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(212, 175, 55, ${Math.max(0, Math.min(1, this.opacity))})`;
+                ctx.fill();
+
+                // Glow
+                if (this.size > 1.5) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity * 0.1})`;
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Inicializar partículas
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new Particle());
+        }
+
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < CONNECTION_DIST) {
+                        // Solo conectar si están cerca del mouse
+                        const mx = (particles[i].x + particles[j].x) / 2;
+                        const my = (particles[i].y + particles[j].y) / 2;
+                        const mouseDist = Math.sqrt((mouse.x - mx) ** 2 + (mouse.y - my) ** 2);
+
+                        if (mouseDist < MOUSE_RADIUS * 1.5) {
+                            const lineOpacity = (1 - dist / CONNECTION_DIST) * (1 - mouseDist / (MOUSE_RADIUS * 1.5)) * 0.3;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(212, 175, 55, ${lineOpacity})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+        }
+
+        let animTime = 0;
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            animTime++;
+
+            particles.forEach(p => {
+                p.update(animTime);
+                p.draw();
+            });
+            drawConnections();
+
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // ===================================================
+        // 2) SONIDO AMBIENTE (AudioContext — sin archivos)
+        // ===================================================
+        let audioCtx = null;
+        let soundEnabled = false;
+        let typewriterOsc = null;
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.querySelector('#sound-toggle i');
+            icon.className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+
+            if (soundEnabled && !audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Notas de una escala pentatónica romántica (Re menor / La menor)
+        const romanticNotes = [261.6, 293.7, 329.6, 392.0, 440.0, 523.3, 587.3];
+        let lastNoteIndex = 0;
+
+        function playTypeSound() {
+            if (!soundEnabled || !audioCtx) return;
+            const now = audioCtx.currentTime;
+
+            // Elegir nota cercana a la anterior (movimiento melódico suave)
+            const step = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+            lastNoteIndex = Math.max(0, Math.min(romanticNotes.length - 1, lastNoteIndex + step));
+            const freq = romanticNotes[lastNoteIndex];
+
+            // Fundamental (piano)
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.value = freq;
+            gain1.gain.setValueAtTime(0.025, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.4);
+
+            // Armónico suave (3ra — una octava arriba y quinta)
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.value = freq * 2;
+            gain2.gain.setValueAtTime(0.008, now);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now);
+            osc2.stop(now + 0.25);
+
+            // Armónico aún más sutil (5ta)
+            const osc3 = audioCtx.createOscillator();
+            const gain3 = audioCtx.createGain();
+            osc3.type = 'sine';
+            osc3.frequency.value = freq * 3;
+            gain3.gain.setValueAtTime(0.003, now);
+            gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc3.connect(gain3);
+            gain3.connect(audioCtx.destination);
+            osc3.start(now);
+            osc3.stop(now + 0.15);
+        }
+
+        // ===================================================
+        // 3) TEXTOS DE LA CARTA (Versión más natural)
+        // ===================================================
+
+        const letterBlocks = [
+            [
+                "Recuerdo cuando te veía en la universidad.",
+                "Entre clases, tareas y el ruido de siempre,",
+                "algo en ti me llamaba la atención sin que supiera explicar por qué.",
+                "Había algo que me hacía mirarte diferente."
+            ],
+            [
+                "Pero el día que más marcó todo fue en la rueda de la fortuna.",
+                "Mientras subíamos, sentía una mezcla de emoción y calma.",
+                "Y cuando llegamos hasta arriba,",
+                "mirando todo desde esa altura, entendí algo muy claro:",
+                "quería vivir muchos momentos así… pero contigo."
+            ],
+            [
+                "No estoy buscando algo complicado.",
+                "No necesito que todo sea perfecto.",
+                "Solo quiero algo sincero, tranquilo y real.",
+                "Quiero ser feliz… y quiero intentarlo a tu lado."
+            ],
+            [
+                "__SEPARATOR__",
+                "Por eso hoy no es solo una carta.",
+                "Es una invitación.",
+                "Quiero que viajemos juntos.",
+                "Quiero que tengamos nuestra próxima aventura.",
+                "No importa el lugar…",
+                "mientras estemos los dos."
+            ]
+        ];
+
+        // ===================================================
+        // 4) TRANSICIÓN: PANTALLA 1 → PANTALLA 2
+        // ===================================================
+        function abrirCarta() {
+            const opening = document.getElementById('screen-opening');
+            const letter = document.getElementById('screen-letter');
+            const container = document.getElementById('letter-container');
+
+            opening.classList.add('fade-out');
+
+            setTimeout(() => {
+                opening.classList.add('is-hidden');
+                letter.classList.remove('is-hidden');
+
+                setTimeout(() => {
+                    container.classList.add('is-visible');
+                    iniciarMaquinaDeEscribir();
+                }, 200);
+            }, 1200);
+        }
+
+        // ===================================================
+        // 5) EFECTO MÁQUINA DE ESCRIBIR (mejorado)
+        // ===================================================
+        async function iniciarMaquinaDeEscribir() {
+            const contentDiv = document.getElementById('typewriter-content');
+            const progressBar = document.getElementById('progress-bar');
+            const totalChars = letterBlocks.flat().join('').length;
+            let writtenChars = 0;
+
+            contentDiv.classList.add('typing-cursor');
+
+            for (let b = 0; b < letterBlocks.length; b++) {
+                const block = letterBlocks[b];
+                const paragraph = document.createElement('p');
+                contentDiv.appendChild(paragraph);
+
+                for (let l = 0; l < block.length; l++) {
+                    const lineText = block[l];
+
+                    if (lineText === '__SEPARATOR__') {
+                        paragraph.innerHTML += `<br><div style="text-align:center; color: var(--gold-dark); font-size: 1.2rem; margin: 12px 0;"><i class="fa-solid fa-feather-pointed"></i></div>`;
+                        continue;
+                    }
+
+                    for (let i = 0; i < lineText.length; i++) {
+                        const char = lineText.charAt(i);
+                        paragraph.appendChild(document.createTextNode(char));
+                        playTypeSound();
+                        writtenChars++;
+
+                        // Actualizar barra de progreso
+                        const progress = (writtenChars / totalChars) * 100;
+                        progressBar.style.width = progress + '%';
+
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+
+                        // Velocidad variable: pausas en puntuación
+                        let speed = 40;
+                        if (char === '.' || char === '…') speed = 400;
+                        else if (char === ',') speed = 200;
+                        else if (char === '\n') speed = 300;
+
+                        await new Promise(r => setTimeout(r, speed));
+                    }
+
+                    paragraph.innerHTML += '<br>';
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                await new Promise(r => setTimeout(r, 1200));
+            }
+
+            contentDiv.classList.remove('typing-cursor');
+            progressBar.style.width = '100%';
+            setTimeout(() => { progressBar.style.opacity = '0'; }, 1000);
+            mostrarBotonDecision();
+        }
+
+        function mostrarBotonDecision() {
+            const btnContainer = document.getElementById('decision-container');
+            btnContainer.style.display = 'block';
+            void btnContainer.offsetWidth;
+            btnContainer.style.opacity = '1';
+
+            setTimeout(() => {
+                btnContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 400);
+        }
+
+        // ===================================================
+        // 6) CARRUSEL 3D ACORDEÓN
+        // ===================================================
+        let currentSlide = 0;
+        const cards = () => document.querySelectorAll('.accordion-card');
+        const dots = () => document.querySelectorAll('.accordion-dot');
+
+        function initAccordionDots() {
+            const container = document.getElementById('accordion-dots');
+            container.innerHTML = '';
+            cards().forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'accordion-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            });
+        }
+
+        function goToSlide(index) {
+            const allCards = cards();
+            const allDots = dots();
+            const total = allCards.length;
+            if (index < 0) index = total - 1;
+            if (index >= total) index = 0;
+
+            currentSlide = index;
+
+            // Posicionar cada tarjeta en 3D
+            allCards.forEach((card, i) => {
+                card.classList.remove('active');
+                const offset = i - index; // Distancia desde el centro
+
+                if (offset === 0) {
+                    // Tarjeta activa: centro, sin rotación, z adelante
+                    card.style.transform = 'translateX(0) translateZ(60px) rotateY(0deg) scale(1)';
+                    card.style.zIndex = 10;
+                    card.style.opacity = '1';
+                    card.classList.add('active');
+                } else {
+                    // Tarjetas laterales: desplazadas, rotadas, más pequeñas
+                    const direction = offset > 0 ? 1 : -1;
+                    const absOffset = Math.abs(offset);
+                    const translateX = direction * (absOffset * 180 + 60);
+                    const rotateY = direction * -35;
+                    const translateZ = -(absOffset * 80 + 40);
+                    const scale = Math.max(0.55, 1 - absOffset * 0.15);
+                    const opacity = Math.max(0, 1 - absOffset * 0.3);
+
+                    card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
+                    card.style.zIndex = 10 - absOffset;
+                    card.style.opacity = opacity;
+
+                    // Ocultar tarjetas muy lejanas
+                    if (absOffset > 2) {
+                        card.style.opacity = '0';
+                        card.style.pointerEvents = 'none';
+                    } else {
+                        card.style.pointerEvents = 'auto';
+                    }
+                }
+            });
+
+            // Actualizar dots
+            allDots.forEach((d, i) => {
+                d.classList.toggle('active', i === index);
+            });
+        }
+
+        function carouselNext() {
+            stopCarouselAutoplay();
+            goToSlide(currentSlide + 1);
+            startCarouselAutoplay();
+        }
+        function carouselPrev() {
+            stopCarouselAutoplay();
+            goToSlide(currentSlide - 1);
+            startCarouselAutoplay();
+        }
+
+        // Auto-play
+        let carouselInterval = null;
+        function startCarouselAutoplay() {
+            stopCarouselAutoplay();
+            carouselInterval = setInterval(() => goToSlide(currentSlide + 1), 5000);
+        }
+        function stopCarouselAutoplay() {
+            if (carouselInterval) { clearInterval(carouselInterval); carouselInterval = null; }
+        }
+
+        function mostrarCarrusel() {
+            const letter = document.getElementById('screen-letter');
+            const carousel = document.getElementById('screen-carousel');
+            const carouselContent = document.getElementById('carousel-content');
+            const title = document.getElementById('carousel-title');
+            const subtitle = document.getElementById('carousel-subtitle');
+
+            letter.classList.add('fade-out');
+
+            setTimeout(() => {
+                letter.classList.add('is-hidden');
+                carousel.classList.remove('is-hidden');
+
+                initAccordionDots();
+                goToSlide(0); // Posicionar tarjetas inicialmente
+
+                setTimeout(() => {
+                    carouselContent.classList.add('is-visible');
+                    title.classList.add('is-visible');
+                    subtitle.classList.add('is-visible');
+                    startCarouselAutoplay();
+                }, 200);
+
+                window.scrollTo(0, 0);
+            }, 1200);
+        }
+
+        // ===================================================
+        // 7) TRANSICIÓN FINAL → BOLETO + CONFETTI
+        // ===================================================
+        function aceptarViaje() {
+            stopCarouselAutoplay();
+            const carousel = document.getElementById('screen-carousel');
+            const ticket = document.getElementById('screen-ticket');
+            const ticketContent = document.getElementById('ticket-content');
+
+            carousel.classList.add('fade-out');
+
+            setTimeout(() => {
+                carousel.classList.add('is-hidden');
+                ticket.classList.remove('is-hidden');
+
+                setTimeout(() => {
+                    ticketContent.classList.add('is-visible');
+                    window.scrollTo(0, 0);
+                    launchConfetti();
+                }, 200);
+            }, 1200);
+        }
+
+        // ===================================================
+        // 8) CONFETTI DORADO (Canvas puro, sin librería)
+        // ===================================================
+        function launchConfetti() {
+            const cCanvas = document.getElementById('confetti-canvas');
+            const cCtx = cCanvas.getContext('2d');
+            cCanvas.width = window.innerWidth;
+            cCanvas.height = window.innerHeight;
+
+            const confettiPieces = [];
+            const colors = ['#d4af37', '#fde047', '#997a00', '#f4ebd8', '#b76e79', '#e3d5b8'];
+            const CONFETTI_COUNT = 150;
+
+            for (let i = 0; i < CONFETTI_COUNT; i++) {
+                confettiPieces.push({
+                    x: Math.random() * cCanvas.width,
+                    y: -Math.random() * cCanvas.height,
+                    w: Math.random() * 8 + 4,
+                    h: Math.random() * 4 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: Math.random() * 3 + 2,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 8,
+                    opacity: 1,
+                });
+            }
+
+            let confettiFrame;
+            function animateConfetti() {
+                cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+                let allDone = true;
+
+                confettiPieces.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05; // gravedad
+                    p.rotation += p.rotSpeed;
+                    p.vx *= 0.99;
+
+                    // Fade a medida que caen
+                    if (p.y > cCanvas.height * 0.7) {
+                        p.opacity -= 0.01;
+                    }
+
+                    if (p.opacity > 0 && p.y < cCanvas.height + 50) {
+                        allDone = false;
+                        cCtx.save();
+                        cCtx.translate(p.x, p.y);
+                        cCtx.rotate((p.rotation * Math.PI) / 180);
+                        cCtx.globalAlpha = Math.max(0, p.opacity);
+                        cCtx.fillStyle = p.color;
+                        cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                        cCtx.restore();
+                    }
+                });
+
+                if (!allDone) {
+                    confettiFrame = requestAnimationFrame(animateConfetti);
+                } else {
+                    cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+                }
+            }
+            animateConfetti();
+
+            // Segundo lanzamiento después de un momento
+            setTimeout(() => {
+                confettiPieces.forEach(p => {
+                    p.x = Math.random() * cCanvas.width;
+                    p.y = -Math.random() * 300;
+                    p.vy = Math.random() * 2 + 1;
+                    p.opacity = 1;
+                });
+            }, 2500);
+        }
+
+        // ===================================================
+        // 9) KEYBOARD: Flechas para carrusel
+        // ===================================================
+        document.addEventListener('keydown', e => {
+            if (!document.getElementById('screen-carousel').classList.contains('is-hidden')) {
+                if (e.key === 'ArrowLeft') carouselPrev();
+                if (e.key === 'ArrowRight') carouselNext();
+            }
+        });
+
+        // Swipe para mobile en carrusel
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            if (document.getElementById('screen-carousel').classList.contains('is-hidden')) return;
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                diff > 0 ? carouselNext() : carouselPrev();
+            }
+        }, { passive: true });
+
+    </script>
+</body>
+
+</html>
